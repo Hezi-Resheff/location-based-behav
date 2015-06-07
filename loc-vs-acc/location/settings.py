@@ -1,3 +1,2 @@
 
-CONN_STR = 'mysql://user:password@server'
-
+DATA_ROOT = "C:\\Users\\t-yeresh\\data\\storks-location"
