@@ -6,8 +6,9 @@ from util import *
 
 def step_dist(file_name):
     data = load_gps_csv(file_name)
-    print(data.groupby(data.bird_id).count().icol(0))
-        
+    for animal_id, animal_data in data.groupby(data.bird_id):        
+        print(animal_id)        
+        print(animal_data[['date_start_fix', 'time_start_fix']])
     
 
 
