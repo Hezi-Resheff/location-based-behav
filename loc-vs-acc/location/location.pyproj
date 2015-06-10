@@ -5,7 +5,7 @@
     <SchemaVersion>2.0</SchemaVersion>
     <ProjectGuid>c28db8c1-d58b-4c18-9f05-c53c64c14183</ProjectGuid>
     <ProjectHome>.</ProjectHome>
-    <StartupFile>location.py</StartupFile>
+    <StartupFile>explore.py</StartupFile>
     <SearchPath>
     </SearchPath>
     <WorkingDirectory>.</WorkingDirectory>
