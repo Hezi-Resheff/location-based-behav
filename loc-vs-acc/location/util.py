@@ -14,6 +14,15 @@ def load_gps_csv(file_name, min_len=10):
     data  = data.loc[data['bird_id'].isin(good_aninmals)]   
     return data 
 
+def iter_animal(file_name, min_len=10, stamp=True, cols=None):
+    data = load_gps_csv(file_name, min_len=min_len)
+    for animal_id, animal_data in data.groupby(data.bird_id):        
+        if stamp:
+            animal_data['stamp'] = animal_data.apply(lambda row: row.date_start_fix + pd.Timedelta(row.time_start_fix), axis=1)    
+        if cols:
+            animal_data = animal_data[cols]
+        yield animal_id, animal_data
+
 def equirectangular_approx_distance(lat1, lon1, lat2, lon2):
     """
     http://www.movable-type.co.uk/scripts/latlong.html
