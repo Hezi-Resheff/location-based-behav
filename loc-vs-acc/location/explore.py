@@ -1,4 +1,6 @@
 import pandas as pd 
+pd.options.display.mpl_style = 'default'
+ 
 import numpy as np 
 import matplotlib.pyplot as plt 
 from mpl_toolkits.basemap import Basemap
@@ -9,7 +11,7 @@ from location import *
 
 
 
-def cum_dist(file_name):       
+def cum_dist(file_name, out_img):       
     plt.figure()
     plt.hold(True)
     for animal_id, animal_data in iter_animal(file_name, cols=["gps_lat", "gps_long", "stamp"]):
@@ -17,13 +19,13 @@ def cum_dist(file_name):
         data['dist'].cumsum().plot()    
     plt.xlabel("Date")
     plt.ylabel("Cumulative distance")
-    plt.show()
+    plt.savefig(os.path.join(st.OUT_FIG_ROOT, out_img + ".png"))
     
-def trajectories(file_name):
+def trajectories(file_name, out_folder):
     for animal_id, animal_data in iter_animal(file_name, cols=["gps_lat", "gps_long"], stamp=False):
         print(animal_id)
         animal_data.plot(x="gps_long", y="gps_lat", style="-x")
-        plt.show()
+        plt.savefig(os.path.join(st.OUT_FIG_ROOT, out_folder, "{}-trajectory-len-{}".format(animal_id, len(animal_data))))
 
 def traj_map(file_name):
     for animal_id, animal_data in iter_animal(file_name, cols=["gps_lat", "gps_long"], stamp=False):  
@@ -57,26 +59,33 @@ def traj_clustres(file_name):
         #ax = data.plot(x='long', y='lat', style="-", color='black')
         plt.hold(True)
         for i in range(len(data)-1):                        
-            c = list("rgb")[data.iloc[i+1].cluster] 
+            c = list("rgbmyk")[data.iloc[i+1].cluster] 
             plt.plot([data.iloc[i].long, data.iloc[i+1].long], [data.iloc[i].lat, data.iloc[i+1].lat], color=c, linestyle='-', linewidth=1)
                    
-        plt.show()
-                                            
-def speed_n_dist_hist(file_name):
+        plt.savefig(os.path.join(st.OUT_FIG_ROOT, out_folder, "{}-trajectory-len-{}".format(animal_id, len(animal_data))))
+        plt.close()
+        
+                                    
+def speed_n_dist_hist(file_name, out_folder):
     for animal_id, animal_data in iter_animal(file_name, cols=["gps_lat", "gps_long", "stamp"]):
         data = compute_steps(animal_data)
         data.hist(column=["dist", "speed"], bins=20)                
+        plt.savefig(os.path.join(st.OUT_FIG_ROOT, out_folder, "{}-dist-speed-all".format(animal_id)))
         data.loc[data.dist > 1].hist(column=["dist", "speed"], bins=40)                
-        plt.show()
+        plt.savefig(os.path.join(st.OUT_FIG_ROOT, out_folder, "{}-dist-speed-where-dist-largerthan-1".format(animal_id)))
 
 def time_delta(file_name):
+    lags = []
     for animal_id, animal_data in iter_animal(file_name, cols=["gps_lat", "gps_long", "stamp"]):
         data = compute_steps(animal_data)
         lag = data.apply(lambda row: row.time.total_seconds(), axis=1) / 60
-        lag.hist(bins=100)
-        plt.figure()
-        lag[lag>21].hist(bins=100)
-        plt.show()
+        lags.extend(lag.values.tolist())
+    l = pd.Series(lags)
+    l.hist()
+    plt.show()
+    plt.figure()
+    l[l>22].hist(bins=100)    
+    plt.show()
 
 
 if __name__ == "__main__":
@@ -85,3 +94,8 @@ if __name__ == "__main__":
     #speed_n_dist_hist("storks_gps_Jan2012.csv")
     #traj_clustres("storks_gps_Jan2012.csv")
     traj_map("storks_gps_Jan2012.csv")
+    #cum_dist("storks_gps_Jan2012.csv", out_img="cumlulative_all_Jan2012")
+    #trajectories("storks_gps_Jan2012.csv", out_folder="trajectories")
+    #speed_n_dist_hist("storks_gps_Jan2012.csv", out_folder="histograms-speed-dist")
+    #traj_clustres("storks_gps_Jan2012.csv","trajectories-cluster-speed")
+    #time_delta("storks_gps_Jan2012.csv")
