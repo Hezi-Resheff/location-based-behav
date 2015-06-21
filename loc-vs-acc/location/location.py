@@ -3,6 +3,8 @@
 import pandas as pd 
 import numpy as np 
 from sklearn.cluster import KMeans
+import matplotlib.pyplot as plt 
+from mpl_toolkits.basemap import Basemap
 
 from util import *
 
@@ -33,5 +35,12 @@ def trajectory_cluster(frame, target, k=3):
     clusters = KMeans(n_clusters=k).fit_predict(np.atleast_2d(frame[target].values).T)
     frame["cluster"] = clusters
     return frame
-    
-    
+       
+
+class MyBasemap(Basemap):     
+    def printcountries(self, d=3, max_len=12):
+        data = pd.io.parsers.read_csv("http://opengeocode.org/cude/download.php?file=/home/fashions/public_html/opengeocode.org/download/cow.txt", 
+                                      sep=";", skiprows=28 )
+        data = data[(data.latitude > self.llcrnrlat+d) & (data.latitude < self.urcrnrlat-d) & (data.longitude > self.llcrnrlon+d) & (data.longitude < self.urcrnrlon-d)]
+        for ix, country in data.iterrows():                            
+                plt.text(*self(country.longitude, country.latitude), s=country.BGN_name[:max_len]) 
