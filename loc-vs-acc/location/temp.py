@@ -42,11 +42,14 @@ map.drawcountries()
 map.printcountries()
 
 # cluster
-clst = trajectory_cluster(compute_steps(animal_data), "speed")["cluster"]
+clst = trajectory_cluster(compute_steps(animal_data), "speed")["cluster"].values 
+cols = np.array(list("krgb"))[clst]
 
 # plot
-x, y = map(animal_data.gps_long.values[1:], animal_data.gps_lat.values[1:])
-map.plot(x, y, clst, linewidth=1)    
+x, y = map(animal_data.gps_long.values, animal_data.gps_lat.values)
+for i in range(len(x)-2):
+    map.plot([x[i], x[i+1]], [y[i], y[i+1]], color=cols[i])
+
 plt.show()
 
 
