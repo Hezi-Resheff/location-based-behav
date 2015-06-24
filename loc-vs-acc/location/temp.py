@@ -5,14 +5,14 @@ import matplotlib.pyplot as plt
 from location import *
 
 
-path = "C:\\Users\\t-yeresh\\data\\acc_location\\StorksIL2013.csv"
+path = "C:\\Users\\t-yeresh\\data\\acc_location\\Storks_Africa__10_to_12_2012.csv"
 
 # Load
 animal_data = pd.DataFrame.from_csv(path, header=None, parse_dates=[2])
 animal_data.columns = ["bird_id", "date", "time", "gps_lat", "gps_long"]
 
 # select animal and claen
-animal_data = animal_data.loc[animal_data.bird_id == 3180]
+animal_data = animal_data.loc[animal_data.bird_id == 2334]
 #animal_data = animal_data[animal_data.gps_lat != 0]
 #animal_data.reset_index(inplace=True) 
 
@@ -47,7 +47,7 @@ cols = np.array(list("brgb"))[clst]
 
 # plot
 x, y = map(animal_data.gps_long.values, animal_data.gps_lat.values)
-map.plot(x,y, "xk")
+map.plot(x,y, "ok-", markersize=2)
 for i in range(len(x)-2):
     map.plot([x[i], x[i+1]], [y[i], y[i+1]], color=cols[i])
 
