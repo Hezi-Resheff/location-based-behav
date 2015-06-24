@@ -33,8 +33,12 @@ def trajectory_cluster(frame, target, k=3):
     :param k: the number of clusters
     """    
     clusters = KMeans(n_clusters=k).fit_predict(np.atleast_2d(frame[target].values).T)
-    frame["cluster"] = clusters
+    frame["cluster"] = clusters    
     return frame
+
+def trajectory_cluster_1(frame, target):    
+    frame["cluster"] =  (frame[target].values >= .2).astype(int) + (frame[target].values >= 10).astype(int)
+    return frame 
        
 
 class MyBasemap(Basemap):     

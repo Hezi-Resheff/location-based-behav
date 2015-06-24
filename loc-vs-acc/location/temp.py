@@ -32,6 +32,10 @@ params = {
         'urcrnrlat':animal_data.gps_lat.max()+10
 }
 
+
+#(compute_steps(animal_data)["speed"].copy()+1).apply(np.log10).hist(bins=25)
+#plt.show()
+
 plt.figure()
 map = MyBasemap(**params)
 
@@ -42,12 +46,12 @@ map.drawcountries()
 map.printcountries()
 
 # cluster
-clst = trajectory_cluster(compute_steps(animal_data), "speed")["cluster"].values 
+clst = trajectory_cluster_1(compute_steps(animal_data), "speed")["cluster"].values 
 cols = np.array(list("brgb"))[clst]
 
 # plot
 x, y = map(animal_data.gps_long.values, animal_data.gps_lat.values)
-map.plot(x,y, "ok-", markersize=2)
+map.plot(x,y, "ok", markersize=5)
 for i in range(len(x)-2):
     map.plot([x[i], x[i+1]], [y[i], y[i+1]], color=cols[i])
 
