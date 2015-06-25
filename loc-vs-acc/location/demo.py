@@ -1,4 +1,4 @@
-""" Just for fun """
+""" The map trajectory demo """ 
 
 import pandas as pd 
 import matplotlib.pyplot as plt 
