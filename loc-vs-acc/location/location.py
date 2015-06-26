@@ -1,5 +1,4 @@
 
-
 import pandas as pd 
 import numpy as np 
 from sklearn.cluster import KMeans
@@ -8,6 +7,21 @@ from mpl_toolkits.basemap import Basemap
 
 from util import *
 
+class trajectory_processor(pd.DataFrame):
+
+    def __init__(self, data = None, index = None, columns = None, dtype = None, copy = False):
+        return super(trajectory_processor, self).__init__(data, index, columns, dtype, copy)
+
+    def compute_steps(self):
+        return self
+    
+    def compute_first_passage(self, radius, max_time=np.inf):
+        return self
+    
+    def cluster(self, target=None):
+        return self
+    
+               
 def compute_steps(frame):
     """ Compute the distance time and speed between points.
     :param frame: Each row is a point. 
@@ -24,7 +38,8 @@ def compute_steps(frame):
     for p in data:    
         p["speed"] = p["dist"] / (p["time"].total_seconds() / pd.Timedelta("1h").total_seconds())
     
-    return pd.DataFrame(data, index=f.stamp[1:])
+    return pd.DataFrame(data, index=f.stamp[:-1])
+
 
 def trajectory_cluster(frame, target, k=3):
     """Naive clustering of trajectory, based on the values of a single column.
