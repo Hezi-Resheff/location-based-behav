@@ -5,20 +5,17 @@ import matplotlib.pyplot as plt
 from location import *
 
 
-path = "C:\\Users\\t-yeresh\\data\\acc_location\\Storks_Africa__10_to_12_2012.csv"
+path = "C:\\data\\Locatoin\\Storks_Africa__10_to_12_2012.csv"
 
 # Load
 animal_data = pd.DataFrame.from_csv(path, header=None, parse_dates=[2])
 animal_data.columns = ["bird_id", "date", "time", "gps_lat", "gps_long"]
-
-# select animal and claen
 animal_data = animal_data.loc[animal_data.bird_id == 2334]
-#animal_data = animal_data[animal_data.gps_lat != 0]
-#animal_data.reset_index(inplace=True) 
 
-#sort  by timestamp
-animal_data['stamp'] = animal_data.apply(lambda row: row.date + pd.Timedelta(row.time), axis=1)    
-animal_data.sort("stamp", inplace=True)
+animal_data = trajectory_processor(animal_data, stamp=True).compute_first_passage(1)
+#animal_data.find_best_fpt()
+
+
 
 params = {
         'projection':'merc', 
@@ -37,6 +34,8 @@ params = {
 #plt.show()
 
 plt.figure()
+
+"""
 map = MyBasemap(**params)
 
 map.drawcoastlines()
@@ -44,16 +43,20 @@ map.fillcontinents(color = 'coral')
 map.drawmapboundary()          
 map.drawcountries()
 map.printcountries()
+"""
 
 # cluster
-clst = trajectory_cluster_1(compute_steps(animal_data), "speed")["cluster"].values 
-cols = np.array(list("brgb"))[clst]
+#clst = trajectory_cluster_1(compute_steps(animal_data), "speed")["cluster"].values 
+clst = trajectory_cluster(animal_data, "FPT_1")["cluster"].values 
+colors = list("grbg")
 
 # plot
-x, y = map(animal_data.gps_long.values, animal_data.gps_lat.values)
+x, y = animal_data.gps_long.values, animal_data.gps_lat.values
+map = plt 
 map.plot(x,y, "ok", markersize=5)
 for i in range(len(x)-2):
-    map.plot([x[i], x[i+1]], [y[i], y[i+1]], color=cols[i])
+    if not np.isnan(clst[i]):
+        map.plot([x[i], x[i+1]], [y[i], y[i+1]], color=colors[clst[i]])
 
 plt.show()
 

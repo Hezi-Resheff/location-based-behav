@@ -21,13 +21,13 @@ class trajectory_processor(pd.DataFrame):
     def compute_steps(self):
         return self
     
-    def compute_first_passage(self, radius, col_name=None):
+    def compute_first_passage(self, radius, col_name=None, hard_max=3):
         """ For each data point, compute the time delta until it first crosses the boundry of the *radius* circle around it """
         if col_name is None:
             col_name = "FPT_" + str(radius)
         self[col_name] = 0
         
-        # TODO: find a better way of computing FPT!
+        # TODO: find a better way of computing FPT! Can use geometric stuff to reduce time... 
         N = len(self)
         for i in range(N):  
             j = i + 1
@@ -40,12 +40,33 @@ class trajectory_processor(pd.DataFrame):
             else:                
                 # end of data
                 self.ix[i, col_name] = np.NaN                   
+        self[col_name] = self[col_name].astype('timedelta64[s]') / 3600 
+        self[col_name] = self[col_name].apply(lambda val: min(val, hard_max))
         return self
 
     def cluster(self, target=None):
         return self
+
+    def find_best_fpt(self, radii=None):
+        """ Use max variance criterion for best radius of FPT """
+        if radii is None:
+            radii = [.1, .5, 1, 2, 5, 10, 25]
+
+        # compute 
+        for rad in radii:
+            self.compute_first_passage(rad)
+
+        # diagnostics 
+        vars = [self["FPT_" + str(rad)].std() for rad in radii]           
+        self._fpt_diag = zip(vars, radii)
+        plt.plot(radii, vars, "x-", markersize=10)
+        plt.xlabel("radius [KM]", fontsize=24)
+        plt.ylabel("std(FPT) [h]", fontsize=24)
+        plt.show()
+
+
     
-               
+      
 def compute_steps(frame):
     """ Compute the distance time and speed between points.
     :param frame: Each row is a point. 
@@ -71,8 +92,10 @@ def trajectory_cluster(frame, target, k=3):
     :param target: teh name of the column to use for clustering
     :param k: the number of clusters
     """    
-    clusters = KMeans(n_clusters=k).fit_predict(np.atleast_2d(frame[target].values).T)
-    frame["cluster"] = clusters    
+    data = frame[target].values
+    data = data[np.logical_not(np.isnan(data))]
+    km = KMeans(n_clusters=k).fit(np.atleast_2d(data).T)
+    frame["cluster"] = [km.predict([val]) if not np.isnan(val) else val for val in frame[target].values]    
     return frame
 
 def trajectory_cluster_1(frame, target):    
@@ -87,3 +110,4 @@ class MyBasemap(Basemap):
         data = data[(data.latitude > self.llcrnrlat+d) & (data.latitude < self.urcrnrlat-d) & (data.longitude > self.llcrnrlon+d) & (data.longitude < self.urcrnrlon-d)]
         for ix, country in data.iterrows():                            
                 plt.text(*self(country.longitude, country.latitude), s=country.BGN_name[:max_len]) 
+
