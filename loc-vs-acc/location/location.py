@@ -44,8 +44,13 @@ class trajectory_processor(pd.DataFrame):
         self[col_name] = self[col_name].apply(lambda val: min(val, hard_max))
         return self
 
-    def cluster(self, target=None):
+    def cluster(self, target=None, k=3):
+        data = self[target].values
+        data = data[np.logical_not(np.isnan(data))]
+        km = KMeans(n_clusters=k).fit(np.atleast_2d(data).T)
+        self["cluster"] = [km.predict([val])[0] if not np.isnan(val) else val for val in self[target].values]    
         return self
+
 
     def find_best_fpt(self, radii=None):
         """ Use max variance criterion for best radius of FPT """
@@ -60,7 +65,7 @@ class trajectory_processor(pd.DataFrame):
         vars = [self["FPT_" + str(rad)].std() for rad in radii]           
         self._fpt_diag = zip(vars, radii)
         plt.plot(radii, vars, "x-", markersize=10)
-        plt.xlabel("radius [KM]", fontsize=24)
+        plt.xlabel("radius [Km]", fontsize=24)
         plt.ylabel("std(FPT) [h]", fontsize=24)
         plt.show()
 
@@ -85,18 +90,6 @@ def compute_steps(frame):
     
     return pd.DataFrame(data, index=f.stamp[:-1])
 
-
-def trajectory_cluster(frame, target, k=3):
-    """Naive clustering of trajectory, based on the values of a single column.
-    :param frame: the data
-    :param target: teh name of the column to use for clustering
-    :param k: the number of clusters
-    """    
-    data = frame[target].values
-    data = data[np.logical_not(np.isnan(data))]
-    km = KMeans(n_clusters=k).fit(np.atleast_2d(data).T)
-    frame["cluster"] = [km.predict([val]) if not np.isnan(val) else val for val in frame[target].values]    
-    return frame
 
 def trajectory_cluster_1(frame, target):    
     frame["cluster"] =  (frame[target].values >= .2).astype(int) + (frame[target].values >= 10).astype(int)

@@ -4,18 +4,23 @@ import pandas as pd
 import matplotlib.pyplot as plt 
 from location import *
 
+from settings import *
 
-path = "C:\\data\\Locatoin\\Storks_Africa__10_to_12_2012.csv"
+path = os.path.join(DATA_ROOT, "Storks_Africa__10_to_12_2012__with_behav.csv")
 
 # Load
 animal_data = pd.DataFrame.from_csv(path, header=None, parse_dates=[2])
-animal_data.columns = ["bird_id", "date", "time", "gps_lat", "gps_long"]
+animal_data.columns = ["bird_id", "date", "time", "gps_lat", "gps_long", "behav", "ODBA"]
 animal_data = animal_data.loc[animal_data.bird_id == 2334]
 
-animal_data = trajectory_processor(animal_data, stamp=True).compute_first_passage(1)
+animal_data = trajectory_processor(animal_data, stamp=True).compute_first_passage(1).cluster("FPT_1", k=3)
 #animal_data.find_best_fpt()
 
 
+# pivot table of behav / cluster -- normalized per cluster 
+pivot = pd.pivot_table(animal_data,  values=["bird_id"], index=["behav"], columns=["cluster"], aggfunc=pd.DataFrame.count).apply(lambda col: col/col.sum()*100, axis=0)
+print(pivot)
+exit(0)
 
 params = {
         'projection':'merc', 
@@ -47,16 +52,17 @@ map.printcountries()
 
 # cluster
 #clst = trajectory_cluster_1(compute_steps(animal_data), "speed")["cluster"].values 
-clst = trajectory_cluster(animal_data, "FPT_1")["cluster"].values 
-colors = list("grbg")
+
+colors = list("rbgy")
 
 # plot
 x, y = animal_data.gps_long.values, animal_data.gps_lat.values
 map = plt 
 map.plot(x,y, "ok", markersize=5)
 for i in range(len(x)-2):
-    if not np.isnan(clst[i]):
-        map.plot([x[i], x[i+1]], [y[i], y[i+1]], color=colors[clst[i]])
+    c = animal_data.ix[i, "cluster"]
+    if not np.isnan(c):
+        map.plot([x[i], x[i+1]], [y[i], y[i+1]], color=colors[c])
 
 plt.show()
 
