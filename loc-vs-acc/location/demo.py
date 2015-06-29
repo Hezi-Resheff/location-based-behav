@@ -5,6 +5,11 @@ import matplotlib.pyplot as plt
 from location import *
 
 from settings import *
+from plots import *
+
+out = plot_fpt_std( "Storks_Africa__10_to_12_2012__with_behav.csv")
+out.to_csv(os.path.join(DATA_ROOT, "out", "fpt-r-var.csv"))
+exit(0)
 
 path = os.path.join(DATA_ROOT, "Storks_Africa__10_to_12_2012__with_behav.csv")
 
@@ -18,9 +23,9 @@ animal_data = trajectory_processor(animal_data, stamp=True).compute_first_passag
 
 
 # pivot table of behav / cluster -- normalized per cluster 
-pivot = pd.pivot_table(animal_data,  values=["bird_id"], index=["behav"], columns=["cluster"], aggfunc=pd.DataFrame.count).apply(lambda col: col/col.sum()*100, axis=0)
-print(pivot)
-exit(0)
+# pivot = pd.pivot_table(animal_data,  values=["bird_id"], index=["behav"], columns=["cluster"], aggfunc=pd.DataFrame.count).apply(lambda col: col/col.sum()*100, axis=0)
+# print(pivot)
+# exit(0)
 
 params = {
         'projection':'merc', 

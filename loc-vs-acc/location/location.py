@@ -52,7 +52,7 @@ class trajectory_processor(pd.DataFrame):
         return self
 
 
-    def find_best_fpt(self, radii=None):
+    def find_best_fpt(self, radii=None, plot=True):
         """ Use max variance criterion for best radius of FPT """
         if radii is None:
             radii = [.1, .5, 1, 2, 5, 10, 25]
@@ -63,11 +63,15 @@ class trajectory_processor(pd.DataFrame):
 
         # diagnostics 
         vars = [self["FPT_" + str(rad)].std() for rad in radii]           
-        self._fpt_diag = zip(vars, radii)
-        plt.plot(radii, vars, "x-", markersize=10)
-        plt.xlabel("radius [Km]", fontsize=24)
-        plt.ylabel("std(FPT) [h]", fontsize=24)
-        plt.show()
+        self._fpt_diag = zip(radii, vars)
+        
+        if plot:
+            plt.plot(radii, vars, "x-", markersize=10)
+            plt.xlabel("radius [Km]", fontsize=24)
+            plt.ylabel("std(FPT) [h]", fontsize=24)
+            plt.show()
+
+        return self 
 
 
     
