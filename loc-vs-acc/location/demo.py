@@ -7,8 +7,8 @@ from location import *
 from settings import *
 from plots import *
 
-out = plot_fpt_std( "Storks_Africa__10_to_12_2012__with_behav.csv")
-out.to_csv(os.path.join(DATA_ROOT, "out", "fpt-r-var.csv"))
+out = copmute_plot_fpt_std( "Storks_Africa__10_to_12_2012__with_behav.csv", hard_max=5)
+out.to_csv(os.path.join(DATA_ROOT, "out", "fpt-r-var__hard_max_5.csv"))
 exit(0)
 
 path = os.path.join(DATA_ROOT, "Storks_Africa__10_to_12_2012__with_behav.csv")
