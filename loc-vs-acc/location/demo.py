@@ -7,25 +7,24 @@ from location import *
 from settings import *
 from plots import *
 
+"""
 out = copmute_plot_fpt_std( "Storks_Africa__10_to_12_2012__with_behav.csv", hard_max=5)
 out.to_csv(os.path.join(DATA_ROOT, "out", "fpt-r-var__hard_max_5.csv"))
 exit(0)
+"""
 
 path = os.path.join(DATA_ROOT, "Storks_Africa__10_to_12_2012__with_behav.csv")
 
 # Load
 animal_data = pd.DataFrame.from_csv(path, header=None, parse_dates=[2])
 animal_data.columns = ["bird_id", "date", "time", "gps_lat", "gps_long", "behav", "ODBA"]
+
+
 animal_data = animal_data.loc[animal_data.bird_id == 2334]
 
 animal_data = trajectory_processor(animal_data, stamp=True).compute_first_passage(1).cluster("FPT_1", k=3)
 #animal_data.find_best_fpt()
 
-
-# pivot table of behav / cluster -- normalized per cluster 
-# pivot = pd.pivot_table(animal_data,  values=["bird_id"], index=["behav"], columns=["cluster"], aggfunc=pd.DataFrame.count).apply(lambda col: col/col.sum()*100, axis=0)
-# print(pivot)
-# exit(0)
 
 params = {
         'projection':'merc', 

@@ -35,6 +35,9 @@
     <Compile Include="demo.py">
       <SubType>Code</SubType>
     </Compile>
+    <Compile Include="tables.py">
+      <SubType>Code</SubType>
+    </Compile>
     <Compile Include="util.py">
       <SubType>Code</SubType>
     </Compile>

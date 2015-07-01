@@ -44,10 +44,14 @@ class trajectory_processor(pd.DataFrame):
         self[col_name] = self[col_name].apply(lambda val: min(val, hard_max))
         return self
 
-    def cluster(self, target=None, k=3):
+    def cluster(self, target, k=3):
         data = self[target].values
         data = data[np.logical_not(np.isnan(data))]
         km = KMeans(n_clusters=k).fit(np.atleast_2d(data).T)
+        
+        # We want the cluster index to be sorted by the values of the centroids (in order to compare runs)
+        km.cluster_centers_.ravel().sort()
+
         self["cluster"] = [km.predict([val])[0] if not np.isnan(val) else val for val in self[target].values]    
         return self
 
