@@ -3,8 +3,8 @@ import pandas as pd
 import numpy as np 
 from sklearn.cluster import KMeans
 import matplotlib.pyplot as plt 
-#from mpl_toolkits.basemap import Basemap
-Basemap = object 
+from mpl_toolkits.basemap import Basemap
+#Basemap = object 
 
 from util import *
 
@@ -12,10 +12,14 @@ class trajectory_processor(pd.DataFrame):
 
     def __init__(self, data = None, index = None, columns = None, dtype = None, copy = False, stamp=True):
         super(trajectory_processor, self).__init__(data, index, columns, dtype, copy)
+        
         if stamp:
             self['stamp'] = self.apply(lambda row: row.date + pd.Timedelta(row.time), axis=1)    
             self.drop(["date","time"], axis=1, inplace=True)
-        self.sort("stamp", inplace=True)
+        
+        if "stamp" in self.columns:
+            self.sort("stamp", inplace=True)
+
         self.reset_index(drop=True, inplace=True)
 
     def compute_steps(self):
@@ -77,7 +81,15 @@ class trajectory_processor(pd.DataFrame):
 
         return self 
 
-
+    def diluted(self, rad=1.0):
+        """ Return a diluted version of this trajectory --- good for plotting """
+        out = []         
+        last_lat, last_lon = 0, 0 # data is all far form this... 
+        for i in range(len(self)):
+            if equirectangular_approx_distance(self.ix[i ,"gps_lat"], self.ix[i, "gps_long"], last_lat, last_lon) > rad:
+                last_lat, last_lon = self.ix[i ,"gps_lat"], self.ix[i, "gps_long"]
+                out.append((last_lon, last_lat))
+        return np.array(out)
     
       
 def compute_steps(frame):
