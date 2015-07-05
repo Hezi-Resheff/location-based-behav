@@ -23,6 +23,11 @@ class trajectory_processor(pd.DataFrame):
         self.reset_index(drop=True, inplace=True)
 
     def compute_steps(self):
+        """ compute time/dist/speed per sample """
+        self["time"] = [self.ix[ix+1, "stamp"] - self.ix[ix, "stamp"] for ix in range(len(self)-1)] + [pd.Timedelta("1h")]
+        self["dist"] = [equirectangular_approx_distance(self.ix[ix, "gps_lat"], self.ix[ix, "gps_long"], self.ix[ix+1, "gps_lat"], self.ix[ix+1, "gps_long"]) for ix in range(len(self)-1)] + [1]
+        self["speed"] =  self.apply(lambda p: p["dist"] / (p["time"].total_seconds() / pd.Timedelta("1h").total_seconds()), axis=1) 
+        self.ix[len(self)-1, ["time", "dist", "speed"]] = np.NaN
         return self
     
     def compute_first_passage(self, radius, col_name=None, hard_max=3):
@@ -100,24 +105,6 @@ class trajectory_processor(pd.DataFrame):
         Cls(raw_data, stamp=True).to_csv(file_path_out)
         
       
-def compute_steps(frame):
-    """ Compute the distance time and speed between points.
-    :param frame: Each row is a point. 
-    """
-    f = frame
-    f1 = f.shift(1)
-        
-    data = [
-        {           
-           "time": f.loc[ix, "stamp"] - f1.loc[ix, "stamp"],
-           "dist": equirectangular_approx_distance(f.loc[ix, "gps_lat"], f.loc[ix, "gps_long"], f1.loc[ix, "gps_lat"], f1.loc[ix, "gps_long"])
-        }
-        for ix in f.index[1:]]
-    for p in data:    
-        p["speed"] = p["dist"] / (p["time"].total_seconds() / pd.Timedelta("1h").total_seconds())
-    
-    return pd.DataFrame(data, index=f.stamp[:-1])
-
 
 def trajectory_cluster_1(frame, target):    
     frame["cluster"] =  (frame[target].values >= .2).astype(int) + (frame[target].values >= 10).astype(int)
@@ -132,10 +119,21 @@ class MyBasemap(Basemap):
         for ix, country in data.iterrows():                            
                 plt.text(*self(country.longitude, country.latitude), s=country.BGN_name[:max_len]) 
 
-
+                
 if __name__ == "__main__":
     from settings import DATA_ROOT
-    #in_file = os.path.join(DATA_ROOT, "Storks_Africa__10_to_12_2012__with_behav__ALL.csv")
+    in_file = os.path.join(DATA_ROOT, "Storks_Africa__10_to_12_2012__with_behav__ALL.csv")
     cols = ["bird_id", "date", "time", "gps_lat", "gps_long", "behav", "ODBA"]
-    trajectory_processor.stamp(in_file, cols, [2], in_file)
+    
+    #trajectory_processor.stamp(in_file, cols, [2], in_file)    
+    #print("Done!")
+
+    data  = pd.DataFrame.from_csv(in_file, parse_dates=["stamp"])
+    animal = data["bird_id"].unique()
+    data = data[data.bird_id == animal[0]]
+    print(data.head())
+
+    data = trajectory_processor(data, stamp=False)
+    data.compute_steps()
+    print(data.head(10))
     print("Done!")
