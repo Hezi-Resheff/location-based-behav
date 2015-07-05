@@ -35,6 +35,7 @@ def equirectangular_approx_distance(lat1, lon1, lat2, lon2):
     d = R * sqrt( x*x + y*y )
     return d
 
+
 if __name__ == "__main__":
     #data = load_gps_csv("storks_gps_Jan2012.csv")
     #print(data)

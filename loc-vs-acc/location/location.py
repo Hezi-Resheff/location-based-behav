@@ -67,6 +67,7 @@ class trajectory_processor(pd.DataFrame):
 
         # compute 
         for rad in radii:
+            print(rad)
             self.compute_first_passage(rad, hard_max=hard_max)
 
         # diagnostics 
@@ -91,6 +92,13 @@ class trajectory_processor(pd.DataFrame):
                 out.append((last_lon, last_lat))
         return np.array(out)
     
+    @classmethod
+    def stamp(Cls, file_path_in, columns, date_cols, file_path_out):
+        """ Convert date/time to stamp """
+        raw_data = pd.DataFrame.from_csv(file_path_in, header=None, parse_dates=date_cols)
+        raw_data.columns = columns
+        Cls(raw_data, stamp=True).to_csv(file_path_out)
+        
       
 def compute_steps(frame):
     """ Compute the distance time and speed between points.
@@ -124,3 +132,10 @@ class MyBasemap(Basemap):
         for ix, country in data.iterrows():                            
                 plt.text(*self(country.longitude, country.latitude), s=country.BGN_name[:max_len]) 
 
+
+if __name__ == "__main__":
+    from settings import DATA_ROOT
+    #in_file = os.path.join(DATA_ROOT, "Storks_Africa__10_to_12_2012__with_behav__ALL.csv")
+    cols = ["bird_id", "date", "time", "gps_lat", "gps_long", "behav", "ODBA"]
+    trajectory_processor.stamp(in_file, cols, [2], in_file)
+    print("Done!")

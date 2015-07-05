@@ -23,9 +23,8 @@ mpl.rcParams['ytick.labelsize'] = 17
 def copmute_plot_fpt_std(data_file, min_sampels=2000, plot=True, hard_max=3):
     # Load
     path = os.path.join(DATA_ROOT, data_file)
-    animal_data = pd.DataFrame.from_csv(path, header=None, parse_dates=[2])
-    animal_data.columns = ["bird_id", "date", "time", "gps_lat", "gps_long", "behav", "ODBA"]
-
+    animal_data = pd.DataFrame.from_csv(path, parse_dates=["stamp"])
+    
     animals = animal_data["bird_id"].unique()
     
     radii = [.1, .5, 1, 2, 5, 10, 25]
@@ -37,7 +36,7 @@ def copmute_plot_fpt_std(data_file, min_sampels=2000, plot=True, hard_max=3):
         if len(data) < min_sampels:
             out.drop(animal, inplace=True, axis=1)            
             continue 
-        tp = trajectory_processor(data, stamp=True).find_best_fpt(radii=radii, plot=False, hard_max=hard_max)
+        tp = trajectory_processor(data, stamp=False).find_best_fpt(radii=radii, plot=False, hard_max=hard_max)
         radii, vars = zip(*tp._fpt_diag)
         out[animal] = vars         
      
@@ -65,9 +64,8 @@ def plot_fpt_std_from_csv(file_path, xmax=10):
 def compute_plot_trajectories(data_file, min_sampels=2000, plot=True):
     """ return/Plot the diluted version of the trajectories """
     path = os.path.join(DATA_ROOT, data_file)
-    animal_data = pd.DataFrame.from_csv(path, header=None, parse_dates=[2])
-    animal_data.columns = ["bird_id", "date", "time", "gps_lat", "gps_long", "behav", "ODBA"]
-
+    animal_data = pd.DataFrame.from_csv(path, parse_dates=["stamp"])
+    
     animals = animal_data["bird_id"].unique()
     trajectories = dict()            
     for animal in animals:
@@ -127,14 +125,20 @@ def plot_trajectories(data, meta):
 #######################################################################################################################
 
 if __name__ == "__main__":
-    opt = "plot-traj"
+    data_file = "Storks_Africa__10_to_12_2012__with_behav__ALL.csv"
+    opt = "plot-fpt-r"
 
     if opt == "plot-fpt-r":
+        # save data for the r-fpt plot 
+        out = copmute_plot_fpt_std(data_file, min_sampels=2000, plot=True, hard_max=3)
+        out.to_csv(os.path.join(DATA_ROOT, "out", "fpt-r-var.csv"))
+
+    elif opt == "plot-fpt-r-file":
         file = os.path.join(DATA_ROOT, "out", "fpt-r-var.csv")
         plot_fpt_std_from_csv(file, xmax=10)
 
-    elif opt == "plot-traj":
-        data_file = "Storks_Africa__10_to_12_2012__with_behav.csv"
+    elif opt == "plot-traj":        
+        # plot all the trajectories in the data. Just to see that it's al ok... 
         compute_plot_trajectories(data_file)
 
     else:
