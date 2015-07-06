@@ -70,7 +70,15 @@ def marginals_etc(data_file, min_sampels=2000, r=1, hard_max=3):
 
 if __name__ == "__main__":
     data = "Storks_Africa__10_to_12_2012__with_behav__ALL.csv"
+    
+    # Compare behav types 
     #p, pn = compare_behav_types(data)    
     #p.to_pickle(os.path.join(DATA_ROOT, "out", "compare_behav_types__panel(r=1-max=3h).pkl"))
     #pn.to_pickle(os.path.join(DATA_ROOT, "out", "compare_behav_types__panel__normalized(r=1-max=3h).pkl"))
+    
+    # Marginals 
     time, distance_cluster, distance_behav, odba_cluster, odba_behav = marginals_etc(data)
+    # save 
+    for p_list in ('time', 'distance_cluster', 'distance_behav', 'odba_cluster', 'odba_behav'):
+        pd.DataFrame(eval(p_list)).to_csv(os.path.join(DATA_ROOT, "out", "marginals", "{}.csv".format(p_list)))
+        

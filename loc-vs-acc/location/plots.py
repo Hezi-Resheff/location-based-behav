@@ -122,11 +122,35 @@ def plot_trajectories(data, meta):
 
 
 
-#######################################################################################################################
+######## Bar plots for per Cluster/Behav stuff ########################################################################
+
+def bar_plot(source, xlabel, ylabel, transpose=True, td=False):
+    frame = pd.DataFrame.from_csv(source)
+    
+    if td:
+        frame = frame.applymap(lambda td: pd.Timedelta(td) / np.timedelta64(1, 'D'))
+        
+    if transpose:
+        frame = frame.T
+    
+    frame.plot(kind='box')
+    
+    if frame.shape[1] == 3:
+        plt.gca().set_xticklabels(['0', '1', '2'])
+    else:
+        plt.gca().set_xticklabels(['Active Flight', 'Passive Flight', 'Walking', 'Standing', 'Sitting'])
+
+    plt.xlabel(xlabel)
+    plt.ylabel(ylabel)
+    plt.show()
+
+
+
+
 
 if __name__ == "__main__":
     data_file = "Storks_Africa__10_to_12_2012__with_behav__ALL.csv"
-    opt = "plot-fpt-r"
+    opt = "marginals"
 
     if opt == "plot-fpt-r":
         # save data for the r-fpt plot 
@@ -140,6 +164,17 @@ if __name__ == "__main__":
     elif opt == "plot-traj":        
         # plot all the trajectories in the data. Just to see that it's al ok... 
         compute_plot_trajectories(data_file)
+
+    elif opt == "marginals":        
+        base_path = os.path.join(DATA_ROOT, "out", "marginals")
+        plots = (
+            ('time.csv', "Cluster", "Total Time (days)", True),
+            ('distance_cluster.csv', "Cluster", "Mean Distance", False),            
+            ('odba_cluster.csv', "Cluster", "Mean ODBA", False),
+            ('odba_behav.csv', "Behavioral Mode", "Mean ODBA", False)
+        )
+        for path, x, y, td in plots:
+            bar_plot(os.path.join(base_path, path), x, y, td=td)
 
     else:
         print("Nothing to do. Good night :)")
