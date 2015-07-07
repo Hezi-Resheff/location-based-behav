@@ -150,7 +150,7 @@ def bar_plot(source, xlabel, ylabel, transpose=True, td=False):
 
 if __name__ == "__main__":
     data_file = "Storks_Africa__10_to_12_2012__with_behav__ALL.csv"
-    opt = "marginals"
+    opt = "plot-fpt-r-file"
 
     if opt == "plot-fpt-r":
         # save data for the r-fpt plot 
