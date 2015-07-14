@@ -68,10 +68,31 @@ def marginals_etc(data_file, min_sampels=2000, r=1, hard_max=3):
 
     return time, distance_cluster, distance_behav, odba_cluster, odba_behav
 
+def data_with_fpt_mode(data_file, min_sampels=2000, r=1, hard_max=3):
+    """ Add the FPT behavioral mode to the entire data """
+    path = os.path.join(DATA_ROOT, data_file)
+    animal_data = pd.DataFrame.from_csv(path, parse_dates=["stamp"])    
+    animal_data.behav = animal_data.behav.replace("\\N", -1).apply(int) # Clean animal behav and add the unknown==-1 style 
+    animal_data.ODBA = animal_data.ODBA.replace("\\N", np.NaN).apply(float) 
+    animals = animal_data["bird_id"].unique()
+
+    def animaliter():
+        for animal in animals:
+            data =  animal_data.loc[animal_data.bird_id == animal].copy()
+            print(animal)
+            if len(data) < min_sampels:            
+                continue              
+            yield data
+                    
+    frames = [trajectory_processor(data, stamp=False).compute_steps().compute_first_passage(r, hard_max=hard_max).clean_day_end().cluster("FPT_{}".format(r), k=3) 
+              for data in animaliter()]
+
+    return pd.concat(frames).reset_index(drop=True)
+
 if __name__ == "__main__":
 
     data_file = "Storks_Africa__10_to_12_2012__with_behav__ALL.csv"
-    opt = "marginals"
+    opt = "add-fpt-modes"
     
     if opt == "compare-behav":
         # Compare behav types 
@@ -85,6 +106,9 @@ if __name__ == "__main__":
         # save 
         for p_list in ('time', 'distance_cluster', 'distance_behav', 'odba_cluster', 'odba_behav'):
             pd.DataFrame(eval(p_list)).to_csv(os.path.join(DATA_ROOT, "out", "marginals", "{}.csv".format(p_list)))
+
+    elif opt == "add-fpt-modes":
+        data_with_fpt_mode(data_file).to_csv(os.path.join(DATA_ROOT, "Storks_Africa__10_to_12_2012__with_behav__ALL__FPT.csv"))
 
     else:
         print("Nothing to do. Good night :)")

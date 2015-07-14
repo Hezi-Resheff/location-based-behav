@@ -13,13 +13,13 @@ class trajectory_processor(pd.DataFrame):
     def __init__(self, data = None, index = None, columns = None, dtype = None, copy = False, stamp=True):
         super(trajectory_processor, self).__init__(data, index, columns, dtype, copy)
         
-        if stamp:
-            self['stamp'] = self.apply(lambda row: row.date + pd.Timedelta(row.time), axis=1)    
-            self.drop(["date","time"], axis=1, inplace=True)
-        
         if "stamp" in self.columns:
             self.sort("stamp", inplace=True)
-
+        
+        elif stamp:
+            self['stamp'] = self.apply(lambda row: row.date + pd.Timedelta(row.time), axis=1)    
+            self.drop(["date","time"], axis=1, inplace=True)
+                
         self.reset_index(drop=True, inplace=True)
 
     def compute_steps(self):

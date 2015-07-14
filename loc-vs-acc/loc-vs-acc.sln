@@ -1,10 +1,8 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 2013
-VisualStudioVersion = 12.0.21005.1
+VisualStudioVersion = 12.0.31101.0
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "loc-vs-acc", "loc-vs-acc\loc-vs-acc.pyproj", "{73647133-ED03-438F-945E-AFB275BCA678}"
-EndProject
 Project("{888888A0-9F3D-457C-B088-3A5042F75D52}") = "location", "location\location.pyproj", "{C28DB8C1-D58B-4C18-9F05-C53C64C14183}"
 EndProject
 Global
@@ -13,8 +11,6 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{73647133-ED03-438F-945E-AFB275BCA678}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{73647133-ED03-438F-945E-AFB275BCA678}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C28DB8C1-D58B-4C18-9F05-C53C64C14183}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{C28DB8C1-D58B-4C18-9F05-C53C64C14183}.Release|Any CPU.ActiveCfg = Release|Any CPU
 	EndGlobalSection
